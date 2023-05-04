@@ -31,7 +31,7 @@ def get_migrating_tracts(ts,pop):
 #      all tracts from ind that migrated in pop
         
 def get_migrating_tracts_ind(ts,pop,ind,size=1000):
-    start_time = time.time()
+    print(" --- Start get_migrating_tracts_ind ---")
     pop_id = [p.id for p in ts.populations() if p.metadata['name']==pop][0]
     mig = ts.tables.migrations
     migrating_tracts = []
@@ -52,8 +52,6 @@ def get_migrating_tracts_ind(ts,pop,ind,size=1000):
 
             u = tree.parent(u)
     #Clean duplicates
-    print(time.time()-start_time)
-    start_time = time.time()
     tracts = migrating_tracts
     flag = True
     while(flag):
@@ -72,14 +70,14 @@ def get_migrating_tracts_ind(ts,pop,ind,size=1000):
                 tracts.pop(j-cnt)
                 cnt=cnt+1
             i=i+1
-    print(time.time()-start_time)
     migrating_tracts = clean_tracts(migrating_tracts,size)
+    print(" --- End get_migrating_tracts_ind ---")
     return migrating_tracts
 
 
 
 def createSeqObs(ts,cut,ind,p1,p2,p3) -> list:
-    print("Start createSeqObs")
+    print(" --- Start createSeqObs ---")
     tables = ts.dump_tables()
     nodes = tables.nodes
     seq = np.zeros((int(ts.sequence_length/cut),2),dtype=int) #List of seq, a seq is a list with nb of mutations
@@ -119,7 +117,7 @@ def createSeqObs(ts,cut,ind,p1,p2,p3) -> list:
             seq[i][0]=seq[i][0]+1
         if b and not c and not d :
             seq[i][1]=seq[i][1]+1
-    print("End createSeqObs")
+    print(" --- End createSeqObs --- ")
 
     return seq
 
@@ -263,19 +261,19 @@ def intersect_tracts(tracts1,tracts2):
 
 #Return the first tract minus the second
 def substract_tracts(tracts1,tracts2):
-    max = 0
+    maxi = 0
     res =[]
     for t in tracts1:
-        if t[1]>max:
-            max=t[1]
+        if t[1]>maxi:
+            maxi=t[1]
     for t in tracts2:
-        if t[1]>max:
-            max=t[1]
+        if t[1]>maxi:
+            maxi=t[1]
     b1=False
     b2=True
     inside=False
     start=-1
-    for i in range(max+1):
+    for i in range(maxi+1):
         if (inTracts(i,tracts1)):
             b1=True
         else:
@@ -290,6 +288,9 @@ def substract_tracts(tracts1,tracts2):
         elif( not(b1 and b2) and inside):
             inside = False
             res.append([start,i])
+
+    if(b1 and b2 and inside):
+        res.append([start,maxi])
     return res
         
 
@@ -324,4 +325,15 @@ def detected_tracts(tracts1,tracts2):
         
     return(count,acc,len(tractsC1)-count,len(tractsC2)-count)
 
+# Input:
+#    seq: The result of the HMM algorithm
+#    tracts: The actual tracts, in the same order as the states. Eg. if the state 0 correspond to non Archaic, the first tracts should correspond to non Archaic tracts.
+def confusionMatrix(seq, tracts):
+    nbState =len(tracts)
+    M = np.zeros((nbState,nbState),dtype=int)
+    for j in range(nbState):
+        for t in tracts[j]:
+            for i in range(t[0],t[-1]):
+                M[seq[i],j]+=1
+    return M
 

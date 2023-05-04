@@ -33,7 +33,6 @@ def initA(Ti,Tn,r,L,a) -> np.array:
 #Tn : Split time between the two Nd families
 #Tea:  Split time between Asia and Europe
 def initB(m,L,Ti,Ta,Tea,Tn) -> np.array: 
-    print("Start Init B")
     B = np.empty(shape=(3,30,30))
     meani = m*L*Ti
     meana = m*L*Ta
@@ -82,54 +81,6 @@ def initB(m,L,Ti,Ta,Tea,Tn) -> np.array:
                 B[0][i][j]=0
                 B[1][i][j]=0
                 B[2][i][j]=0
-    return B
-
-#Ti : Out of Africa
-#Ta:  Split time between Nd and Sp
-#Tea: Split time between Eu and As
-#Tn: Split time between the two Nd families
-def initBNotCond(m,L,Ti,Ta,Tea,Tn) -> np.array:
-    print("Start Init B")
-    B = np.empty(shape=(3,30,30))
-    meani = m*L*Ti
-    meana = m*L*Ta
-    meanea = m*L*Tea
-    meann = m*L*Tn
-    Pea = np.empty(30)
-    Pa=np.empty(30)
-    Pi=np.empty(30)
-
-    Pn=np.empty(30)
-    Pea[0]=np.exp(-meanea)
-    Pn[0]=np.exp(-(meann))
-    Pi[0]=np.exp(-(meani))
-    Pa[0]=np.exp(-(meana))
-    suma=0
-    sumea=0
-    sumi=0
-    sumn=0
-    for i in range(1,30):
-        Pea[i]=Pea[i-1]*meanea/i
-        Pn[i]=Pn[i-1]*meann/i
-        Pi[i]=Pi[i-1]*meani/i
-        Pa[i]=Pa[i-1]*meana/i
-        sumea=sumea+Pea[i]
-        sumn=sumn+Pn[i]
-        sumi=sumi+Pi[i]
-        suma=suma+Pa[i]
-
-    Pea[0]=1-sumea
-    Pn[0]=1-sumn
-    Pi[0]=1-sumi
-    Pa[0]=1-suma
-
-  
-    for i in range(30):
-        for j in range(30):
-            B[0][i][j]=Pi[i]*Pea[j] #Not Nd
-            B[1][i][j]=Pa[i]*Pea[j] #Nd in Asia
-            B[2][i][j]=Pa[i]*Pn[j]  #Nd not in Asia
-  
     return B
 
 
